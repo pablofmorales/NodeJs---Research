@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <title>Ejemplo de Socket.io</title>
+        <script src="http://10.0.5.74:4000/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <div id="mensaje"></div>
+        <input type="text" name="mensaje" id="chat" placeholder="deja tu mensaje" />
+        <input type="button" name="submit" value="Chat" onClick="enviar();" />
+        <script>
+          var socket = io.connect('http://10.0.5.74:4000');
+          var msg = document.getElementById('mensaje');
+          var chat = document.getElementById('chat');
+          socket.on('chat', function (data) {
+            console.log(data.msg);
+            msg.innerHTML = data.msg;
+          });
+          function enviar()
+          {
+            socket.emit('chat', {'msg': chat.value});
+          }
+        </script>
+    </body>
+</html>
