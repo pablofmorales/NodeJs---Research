@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <script src="http://localhost:8000/socket.io/socket.io.js"></script>
+    <style>
+        #chat {
+            width: 400px;
+            height: 200px;
+            border: solid 1px gray;
+            overflow-y: scroll;
+        }
+        p { margin: .3em .5em; }
+        .time { color: gray; }
+        .nick { color: green; }
+    </style>
+    <title>Chat</title>
+</head>
+<body>
+    <div id="chat"></div>
+    <form>
+    <input type="text" name="msg" id="msg" value="" />
+    <input type="submit" value="send" onclick="send();return false" />
+    </form>
+    <script>
+        var socket = io.connect('http://localhost:8000');
+        var nick = location.search.substring(1).split('=')[1];
+        var chat = document.getElementById('chat');
+        var msg = document.getElementById('msg');
+
+        socket.emit('login', nick); // login into chat
+
+        socket.on('chat', function (data) {
+            console.log(data.nick + ':' + data.msg);
+            if (data.error)
+                location.href = '/?error=' + data.msg;
+            else {
+                chat.innerHTML += get_html(data);
+                location.href = '#' + data.time; // go to end of chat
+            }
+        });
+
+        function get_html(data) {
+            var time = '<span class="time">[' + ftime(data.time) + ']</span> ';
+            var nick = '<span class="nick">' + data.nick + '</span>: ';
+            var msg = '<span class="msg">' + data.msg + '</span>';
+            var anchor = '<a name="' + data.time + '"></a>';
+            return anchor + '<p>' + time + nick + msg + '</p>';
+        }
+        function ftime(time) {
+            var t = new Date(time);
+            var hour = t.getHours();
+            if (hour < 10) hour = '0' + hour;
+            var min = t.getMinutes();
+            if (min < 10) min = '0' + min;
+            return hour + ':' + min;
+        }
+        function send() {
+            socket.emit('msg', {'msg': msg.value});
+            msg.value = '';
+        }
+    </script>
+</body>
+</html>

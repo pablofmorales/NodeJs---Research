@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Login</title>
+</head>
+<body>
+    <form action="/chat" onsubmit="return login()">
+        <input type="text" name="nick" value="" placeholder="Enter nick"/>
+        <input type="submit" value="Login" />
+        <span style="color:red" id="error"></span>
+    </form>
+    <script>
+        var msg = location.search.substring(1).split('=')[1];
+        if (msg) {
+            error = document.getElementById('error');
+            error.innerHTML = unescape(msg);
+        }
+
+        function login() {
+            if (document.forms[0].nick.value === '')
+                return false;
+        }
+    </script>
+</body>
+</html>

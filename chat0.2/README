@@ -1,0 +1,6 @@
+Algunas mejoras sobre el chat Rigazzi:
+ * Login con nick (no se permiten dos nicks iguales).
+ * El div chat va acumulando los mensajes entrantes.
+ * Los mensajes muestran quién los envió y a qué hora.
+ * El script init-chat permite levantar la app como un servicio.
+ * Algo de css.

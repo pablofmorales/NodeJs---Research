@@ -1,0 +1,16 @@
+#!/bin/sh -e
+
+# npm install -g forever
+
+set -e
+PATH=~/node/0.6.9/bin:/bin:/usr/bin:/sbin:/usr/sbin
+DAEMON=app.js
+case "$1" in
+	start) forever start $DAEMON ;;
+	stop) forever stop $DAEMON ;;
+	force-reload|restart) forever restart $DAEMON ;;
+	*) echo "Usage: ~/init-node {start|stop|restart|force-reload}"
+	   exit 1
+;;
+esac
+exit 0
