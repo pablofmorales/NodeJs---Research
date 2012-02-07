@@ -1,29 +1,32 @@
 Documentacion
-h1. Websockets
+=============
 
-h2. Links útiles
+Websockets
+----------
 
-* [http://en.wikipedia.org/wiki/WebSocket]
-* [The WebSocket Protocol|http://tools.ietf.org/html/rfc6455] (rfc 6455)
-* [Node.js|http://nodejs.org/]
-* [socket.io|http://socket.io/]
-* [http://visionmedia.github.com/expresso/] Tdd with Nodejs
-* [http://es.wikipedia.org/wiki/Programaci%C3%B3n_basada_en_prototipos] POO with Prototypes
-* [Node Web Development|http://confluence.olx.com.ar/download/attachments/9897088/2011+-+Node+Web+Development.pdf] libro en pdf
+### Links útiles
 
-h2. HowTo's
+* http://en.wikipedia.org/wiki/WebSocket
+* The WebSocket Protocol http://tools.ietf.org/html/rfc6455 (rfc 6455)
+* Node.js|http://nodejs.org/
+* socket.io|http://socket.io/
+* http://visionmedia.github.com/expresso/ Tdd with Nodejs
+* http://es.wikipedia.org/wiki/Programaci%C3%B3n_basada_en_prototipos POO with Prototypes
+* Node Web Development|http://confluence.olx.com.ar/download/attachments/9897088/2011+-+Node+Web+Development.pdf libro en pdf
+
+### HowTo's
 
 * [Node.js]
 
-h2. Repository in Github
+### Repository in Github
 
-* [https://github.com/pablofmorales/NodeJs---Research]
+* https://github.com/pablofmorales/NodeJs---Research
 Please add your github's account. In the next list
 ** pablofmorales
 ** lvidarte
 ** tuerto
 
-h2. Participantes
+### Participantes
 
 * Alfredo Ramirez
 * Pablo Morales
@@ -31,25 +34,6 @@ h2. Participantes
 * Leonardo Vidarte
 * Gustavo Signorele
 * Pablo Díaz Ogni
-
-
-{section}
-{column:width=60%}
-{recently-updated}
-{column}
-{column:width=5%}
-{column}
-{column:width=35%}
-
-h6. Navigate space
-{pagetreesearch}
-{pagetree}
-{column}
-{section}
-
-
-
-
 
 
 Día 1 [03-02-2011]
