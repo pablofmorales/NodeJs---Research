@@ -1,15 +1,15 @@
-var app = require('http').createServer(handler);
-var io = require('socket.io').listen(app);
-var fs = require('fs');
-var url = require('url');
-
+var app   = require('http').createServer(handler);
+var io    = require('socket.io').listen(app);
+var fs    = require('fs');
+var url   = require('url');
 var conns = [];
 
 function handler (req, res) {
-    if (req.url.match(/^\/chat\?nick=/))
+    if (req.url.match(/^\/chat\?nick=/)){
         show('/chat.html', res);
-    else
+    }else{
         show('/login.html', res);
+    }
 }
 
 app.listen(8000);
@@ -35,15 +35,15 @@ io.sockets.on('connection', function (socket) {
             }
         }
         if (nick_exists) {
-            msg = { nick:  '_SERVER_',
-                    msg:   nick + ' already exists',
-                    time:  Date.now(),
-                    error: true };
+            msg = { nick:  'SERVER BOT',
+                msg:   nick + ' already exists',
+                time:  Date.now(),
+                error: true };
         }
         else {
             socket.nick = nick; // Save nickname in socket
             conns.push(socket);
-            msg = { nick:  '_SERVER_',
+            msg = { nick:  'SERVER BOT',
                     msg:   'Hello ' + nick,
                     time:  Date.now(),
                     error: false };
@@ -54,10 +54,21 @@ io.sockets.on('connection', function (socket) {
     socket.on('msg', function (data) {
         console.log(data);
         for (var i=0; i<conns.length; i++) {
-            conns[i].emit('chat', { nick:  socket.nick,
-                                    msg:   data.msg,
-                                    time:  Date.now(),
-                                    error: false });
+            conns[i].emit('chat', 
+                { nick:  socket.nick,
+                msg:   data.msg,
+                time:  Date.now(),
+                error: false });
         }
     });
+
+    socket.on('getList', function(data ){
+
+        var result = '';
+        for (var i=0; i<conns.length; i++) {
+            result += '<li>' + conns[i].nick + '</li>';
+        }
+        socket.emit('userlist', {'nicks': result});
+    });
+        
 });

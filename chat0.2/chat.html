@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <script src="http://localhost:8000/socket.io/socket.io.js"></script>
+    <script src="http://10.0.5.94:8000/socket.io/socket.io.js"></script>
     <style>
         #chat {
             width: 400px;
@@ -22,11 +22,16 @@
     <input type="text" name="msg" id="msg" value="" />
     <input type="submit" value="send" onclick="send();return false" />
     </form>
+    <div>
+        <ul id='userlist'>
+        </ul>
+    </div>
     <script>
-        var socket = io.connect('http://localhost:8000');
+        var socket = io.connect('http://10.0.5.94:8000');
         var nick = location.search.substring(1).split('=')[1];
         var chat = document.getElementById('chat');
         var msg = document.getElementById('msg');
+
 
         socket.emit('login', nick); // login into chat
 
@@ -39,6 +44,15 @@
                 location.href = '#' + data.time; // go to end of chat
             }
         });
+
+            socket.emit('getList');
+
+            socket.on('userlist',function (data) {
+                document.getElementById('userlist').innerHTML = '';
+                console.log(data);    
+                document.getElementById('userlist').innerHTML = data.nicks; 
+            });
+        
 
         function get_html(data) {
             var time = '<span class="time">[' + ftime(data.time) + ']</span> ';
@@ -58,6 +72,7 @@
         function send() {
             socket.emit('msg', {'msg': msg.value});
             msg.value = '';
+        
         }
     </script>
 </body>
