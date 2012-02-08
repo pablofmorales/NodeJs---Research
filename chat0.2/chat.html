@@ -34,6 +34,8 @@
         var nick = location.search.substring(1).split('=')[1];
         var chat = document.getElementById('chat');
         var msg = document.getElementById('msg');
+        var storage = {'history': []};
+        var init = true;
 
         // login into chat
         socket.emit('login', { 'nick': nick });
@@ -43,7 +45,12 @@
             if (data.error)
                 location.href = '/?error=' + data.msg;
             else {
+                if (init) {
+                    init = false;
+                    load_history();
+                }
                 chat.innerHTML += get_html(data);
+                save_history(data);
                 location.href = '#' + data.time; // go to end of chat
             }
         });
@@ -85,6 +92,28 @@
                 location.href = '/';
             }
         }
+
+        function save_history (data) {
+            var _storage = JSON.parse(localStorage.getItem(nick));
+            if (!_storage) {
+                _storage = storage;
+            }
+            _storage.history.push(data);
+            if (_storage.history.length > 10) {
+                _storage.history.splice(0, 1);
+            }
+            localStorage.setItem(nick, JSON.stringify(_storage));
+        }
+
+        function load_history () {
+            var _storage = JSON.parse(localStorage.getItem(nick));
+            if (_storage) {
+                for (var i=0; i<_storage.history.length; i++) {
+                    chat.innerHTML += get_html(_storage.history[i]);
+                }
+            }
+        }
+
     </script>
 </body>
 </html>
