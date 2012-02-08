@@ -1,8 +1,9 @@
-var app = require('http').createServer(handler);
+var app = require('http').createServer(handler).listen(8000);
 var io = require('socket.io').listen(app);
 var fs = require('fs');
 var url = require('url');
 
+var servername = '_SERVER_';
 var conns = [];
 
 function handler (req, res) {
@@ -15,8 +16,6 @@ function handler (req, res) {
         res.end('Document not found');
     }
 }
-
-app.listen(8000);
 
 function show(filename, res) {
     fs.readFile(__dirname + filename, function (err, data) {
@@ -31,9 +30,12 @@ function show(filename, res) {
 
 io.set('heartbeats', false);
 io.sockets.on('connection', function (socket) {
+
     socket.on('disconnect', function () {
-        logout({'nick': socket.nick, 'id': socket.id});
+        logout({'nick': socket.nick});
+        console.log(socket.nick + ' has disconnected');
     })
+
     socket.on('login', function (data) {
         var nick_exists = false;
         for (var i=0; i<conns.length; i++) {
@@ -43,7 +45,7 @@ io.sockets.on('connection', function (socket) {
             }
         }
         if (nick_exists) {
-            msg = { nick:  '_SERVER_',
+            msg = { nick:  servername,
                     msg:   data.nick + ' already exists',
                     time:  Date.now(),
                     error: true };
@@ -53,20 +55,22 @@ io.sockets.on('connection', function (socket) {
             conns.push(socket);
             // Broadcast message
             socket.broadcast.emit('chat',
-                                  { nick: '_SERVER_',
-                                    msg:  data.nick + ' has joined the chat',
+                                  { nick: servername,
+                                    msg:  data.nick + ' has joined',
                                     time: Date.now() });
             // Welcome message
-            msg = { nick: '_SERVER_',
+            msg = { nick: servername,
                     msg:  'Hello ' + data.nick,
                     time: Date.now() };
         }
         console.log(msg);
         socket.emit('chat', msg);
     });
+
     socket.on('logout', function(data) {
         logout(data);
     });
+
     socket.on('msg', function (data) {
         console.log(data);
         for (var i=0; i<conns.length; i++) {
@@ -75,17 +79,17 @@ io.sockets.on('connection', function (socket) {
                                     time: Date.now() });
         }
     });
+
 });
 
 function logout (data) {
     for (var i=0; i<conns.length; i++) {
         if (conns[i].nick == data.nick) {
             conns[i].broadcast.emit('chat',
-                                    { nick: '_SERVER_',
-                                      msg:  data.nick + ' has left the chat',
+                                    { nick: servername,
+                                      msg:  data.nick + ' has quit',
                                       time: Date.now() });
             s = conns.splice(i, 1);
-            console.log('user disconnect: ' + data.nick);
             break;
         }
     }

@@ -34,11 +34,19 @@ Please add your github's account. In the next list
 * Leonardo Vidarte
 * Gustavo Signorele
 * Pablo Díaz Ogni
+* Pablo Rigazzi
+* Andrés M
 
+### Log
 
 Día 1 [03-02-2011]
-	* Instalación Node.js / socket.io
-	* Primer ejemplo usable: un recontra mini chat
+
+* Instalación Node.js / socket.io
+* Primer ejemplo usable: un recontra mini chat
+
+Día 2 [06-02-2011]
+
+* Agregado de listado de usuarios conectados.
 
 
 
