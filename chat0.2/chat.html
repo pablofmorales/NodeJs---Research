@@ -21,7 +21,7 @@
 <body>
     <div id="chat"></div>
     <form>
-    <input type="text" name="msg" id="msg" value="" />
+    <input type="text" name="msg" id="msg" value="" autofocus="autofocus" />
     <input type="submit" value="send" onclick="send();return false" />
     <a href="javascript:logout()">logout</a>
     </form>
@@ -46,6 +46,7 @@
                 chat.innerHTML += get_html(data);
                 location.href = '#' + data.time; // go to end of chat
             }
+            msg.focus();
         });
 
         socket.emit('getList');
@@ -77,6 +78,7 @@
         function send() {
             socket.emit('msg', {'msg': msg.value});
             msg.value = '';
+            msg.focus();
         }
 
         function logout() {
