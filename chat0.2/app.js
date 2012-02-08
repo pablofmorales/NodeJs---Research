@@ -33,7 +33,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('disconnect', function () {
         logout({'nick': socket.nick});
-        console.log(socket.nick + ' has disconnected');
+        console.log(socket.nick + ' has disconnected'); 
     })
 
     socket.on('login', function (data) {
@@ -53,6 +53,7 @@ io.sockets.on('connection', function (socket) {
         else {
             socket.nick = data.nick; // Save nickname in socket
             conns.push(socket);
+            sendUserList(socket);
             // Broadcast message
             socket.broadcast.emit('chat',
                                   { nick: servername,
@@ -80,15 +81,20 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
-    socket.on('getList', function(data ){
-        var result = '';
-        for (var i=0; i<conns.length; i++) {
-            result += '<li>' + conns[i].nick + '</li>';
-        }
-        socket.emit('userlist', {'nicks': result});
+    socket.on('getList', function(){
+        sendUserList(socket);
     });
 
 });
+
+function sendUserList() {
+    var result = '';
+    for (var i=0; i<conns.length; i++) {
+        result += '<li>' + conns[i].nick + '</li>';
+    }
+    io.sockets.emit('userlist', {'nicks': result});
+}
+
 
 function logout (data) {
     for (var i=0; i<conns.length; i++) {
@@ -101,4 +107,5 @@ function logout (data) {
             break;
         }
     }
+    sendUserList();
 }
