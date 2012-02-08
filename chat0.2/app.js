@@ -1,4 +1,4 @@
-var app = require('http').createServer(handler).listen(8000);
+var app = require('http').createServer(handler).listen(8000, '10.0.5.93');
 var io = require('socket.io').listen(app);
 var fs = require('fs');
 var url = require('url');
