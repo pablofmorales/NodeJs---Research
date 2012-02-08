@@ -8,8 +8,12 @@ var conns = [];
 function handler (req, res) {
     if (req.url.match(/^\/chat\?nick=/))
         show('/chat.html', res);
-    else
+    else if (req.url.match(/^(\/|\/\?error=.*)$/))
         show('/login.html', res);
+    else {
+        res.writeHead(404);
+        res.end('Document not found');
+    }
 }
 
 app.listen(8000);
@@ -25,39 +29,64 @@ function show(filename, res) {
     });
 }
 
+io.set('heartbeats', false);
 io.sockets.on('connection', function (socket) {
-    socket.on('login', function (nick) {
+    socket.on('disconnect', function () {
+        logout({'nick': socket.nick, 'id': socket.id});
+    })
+    socket.on('login', function (data) {
         var nick_exists = false;
         for (var i=0; i<conns.length; i++) {
-            if (conns[i].nick == nick) {
+            if (conns[i].nick == data.nick) {
                 nick_exists = true;
                 break;
             }
         }
         if (nick_exists) {
             msg = { nick:  '_SERVER_',
-                    msg:   nick + ' already exists',
+                    msg:   data.nick + ' already exists',
                     time:  Date.now(),
                     error: true };
         }
         else {
-            socket.nick = nick; // Save nickname in socket
+            socket.nick = data.nick; // Save nickname in socket
             conns.push(socket);
-            msg = { nick:  '_SERVER_',
-                    msg:   'Hello ' + nick,
-                    time:  Date.now(),
-                    error: false };
+            // Broadcast message
+            socket.broadcast.emit('chat',
+                                  { nick: '_SERVER_',
+                                    msg:  data.nick + ' has joined the chat',
+                                    time: Date.now() });
+            // Welcome message
+            msg = { nick: '_SERVER_',
+                    msg:  'Hello ' + data.nick,
+                    time: Date.now() };
         }
         console.log(msg);
         socket.emit('chat', msg);
     });
+    socket.on('logout', function(data) {
+        logout(data);
+    });
     socket.on('msg', function (data) {
         console.log(data);
         for (var i=0; i<conns.length; i++) {
-            conns[i].emit('chat', { nick:  socket.nick,
-                                    msg:   data.msg,
-                                    time:  Date.now(),
-                                    error: false });
+            conns[i].emit('chat', { nick: socket.nick,
+                                    msg:  data.msg,
+                                    time: Date.now() });
         }
     });
 });
+
+function logout (data) {
+    for (var i=0; i<conns.length; i++) {
+        if (conns[i].nick == data.nick) {
+            conns[i].broadcast.emit('chat',
+                                    { nick: '_SERVER_',
+                                      msg:  data.nick + ' has left the chat',
+                                      time: Date.now() });
+            s = conns.splice(i, 1);
+            console.log('user disconnect: ' + data.nick);
+            break;
+        }
+    }
+}
