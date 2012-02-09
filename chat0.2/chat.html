@@ -14,7 +14,7 @@
         p { margin: .3em .5em; }
         .time { color: gray; }
         .nick-server { color: red; }
-        .nick-user { color: blue; }
+        .nick-client { color: blue; }
     </style>
     <title>Chat</title>
 </head>
@@ -26,12 +26,12 @@
     <a href="javascript:logout()">logout</a>
     </form>
     <div>
-        <ul id='userlist'>
+        <ul id='nick-list'>
         </ul>
     </div>
     <script>
         var socket = io.connect();
-        var nick = location.search.substring(1).split('=')[1];
+        var nick = get_nick();
         var chat = document.getElementById('chat');
         var msg = document.getElementById('msg');
         var storage = {'history': []};
@@ -55,24 +55,31 @@
             }
         });
 
-        socket.emit('getList');
-
-        socket.on('userlist', function (data) {
-            document.getElementById('userlist').innerHTML = '';
+        socket.on('nickList', function (data) {
+            document.getElementById('nick-list').innerHTML = '';
             console.log(data);    
-            document.getElementById('userlist').innerHTML = data.nicks; 
+            document.getElementById('nick-list').innerHTML = data.nicks; 
         });
 
-        function get_html(data) {
-            var time = '<span class="time">[' + ftime(data.time) + ']</span> ';
-            var nick_class = (data.nick == 'SERVER BOT') ? 'nick-server' : 'nick-user';
-            var nick = '<span class="' + nick_class + '">' + data.nick + '</span>: ';
-            var msg = '<span class="msg">' + data.msg + '</span>';
-            var anchor = '<a name="' + data.time + '"></a>';
-            return anchor + '<p>' + time + nick + msg + '</p>';
+        function get_nick () {
+            nick = location.search.substring(1).split('=')[1];
+            nick = unescape(nick);
+            nick = nick.replace(/\+/g, ' '); // + to space
+            nick = nick.replace(/^\s+/g, '').replace(/\s+$/g, ''); // trim
+            nick = nick.replace(/ +/g, '_'); // space to _
+            return nick;
         }
 
-        function ftime(time) {
+        function get_html (data) {
+            var time = '<span class="time">[' + ftime(data.time) + ']</span> ';
+            var nick_class = (data.nick == 'SERVER') ? 'nick-server' : 'nick-client';
+            var nick = '<span class="' + nick_class + '">' + data.nick + '</span>';
+            var msg = '<span class="msg">' + data.msg + '</span>';
+            var anchor = '<a name="' + data.time + '"></a>';
+            return anchor + '<p>' + time + '&lt;' + nick + '&gt; ' + msg + '</p>';
+        }
+
+        function ftime (time) {
             var t = new Date(time);
             var hour = t.getHours();
             if (hour < 10) hour = '0' + hour;
@@ -81,12 +88,12 @@
             return hour + ':' + min;
         }
 
-        function send() {
+        function send () {
             socket.emit('msg', {'msg': msg.value});
             msg.value = '';
         }
 
-        function logout() {
+        function logout () {
             if (confirm('Leave the chat?')) {
                 socket.emit('logout', { 'nick': nick });
                 location.href = '/';

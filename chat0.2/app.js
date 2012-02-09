@@ -1,9 +1,9 @@
-var app = require('http').createServer(handler).listen(8000, '10.0.5.93');
+var app = require('http').createServer(handler).listen(8000);
 var io = require('socket.io').listen(app);
 var fs = require('fs');
 var url = require('url');
 
-var servername = 'SERVER BOT';
+var servername = 'SERVER';
 var conns = [];
 
 function handler (req, res) {
@@ -44,7 +44,7 @@ io.sockets.on('connection', function (socket) {
                 break;
             }
         }
-        if (nick_exists) {
+        if (data.nick == servername || nick_exists) {
             msg = { nick:  servername,
                     msg:   data.nick + ' already exists',
                     time:  Date.now(),
@@ -53,13 +53,13 @@ io.sockets.on('connection', function (socket) {
         else {
             socket.nick = data.nick; // Save nickname in socket
             conns.push(socket);
-            sendUserList(socket);
-            // Broadcast message
+            sendNickList();
+            // Broadcast message (user joined)
             socket.broadcast.emit('chat',
                                   { nick: servername,
                                     msg:  data.nick + ' has joined',
                                     time: Date.now() });
-            // Welcome message
+            // Welcome message (user only)
             msg = { nick: servername,
                     msg:  'Hello ' + data.nick,
                     time: Date.now() };
@@ -74,27 +74,21 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('msg', function (data) {
         console.log(data);
-        for (var i=0; i<conns.length; i++) {
-            conns[i].emit('chat', { nick: socket.nick,
-                                    msg:  data.msg,
-                                    time: Date.now() });
-        }
+        io.sockets.emit('chat', { nick: socket.nick,
+                                  msg:  data.msg,
+                                  time: Date.now() });
     });
 
-    socket.on('getList', function(){
-        sendUserList(socket);
-    });
 
 });
 
-function sendUserList() {
+function sendNickList() {
     var result = '';
     for (var i=0; i<conns.length; i++) {
         result += '<li>' + conns[i].nick + '</li>';
     }
-    io.sockets.emit('userlist', {'nicks': result});
+    io.sockets.emit('nickList', {'nicks': result});
 }
-
 
 function logout (data) {
     for (var i=0; i<conns.length; i++) {
@@ -107,5 +101,5 @@ function logout (data) {
             break;
         }
     }
-    sendUserList();
+    sendNickList();
 }
