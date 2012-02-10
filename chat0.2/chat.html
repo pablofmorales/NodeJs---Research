@@ -10,7 +10,7 @@
             border: solid 1px gray;
             overflow-y: scroll;
         }
-        #msg { width: 280px; }
+        #msg { width: 250px; }
         p { margin: .3em .5em; }
         .time { color: gray; }
         .nick-server { color: red; }
@@ -20,9 +20,10 @@
 </head>
 <body>
     <div id="chat"></div>
-    <form>
+    <form onsubmit="send();return false">
     <input type="text" name="msg" id="msg" value="" autofocus="autofocus" />
-    <input type="submit" value="send" onclick="send();return false" />
+    <input type="submit" value="send" />
+    <a href="javascript:exportHistory()">export</a>
     <a href="javascript:logout()">logout</a>
     </form>
     <div id='nick-list'></div>
@@ -105,14 +106,20 @@
 
         function save_history (data) {
             var _storage = JSON.parse(localStorage.getItem(nick));
+            var _sessionStorage = JSON.parse(sessionStorage.getItem(nick));
             if (!_storage) {
                 _storage = storage;
             }
+            if (!_sessionStorage) {
+                _sessionStorage = storage;
+			}
             _storage.history.push(data);
-            if (_storage.history.length > 10) {
+			_sessionStorage.history.push(data);
+			if (_storage.history.length > 10) {
                 _storage.history.splice(0, 1);
             }
             localStorage.setItem(nick, JSON.stringify(_storage));
+            sessionStorage.setItem(nick, JSON.stringify(_sessionStorage));
         }
 
         function load_history () {
@@ -121,9 +128,23 @@
                 for (var i=0; i<_storage.history.length; i++) {
                     chat.innerHTML += get_html(_storage.history[i]);
                 }
+				sessionStorage.setItem(nick, JSON.stringify(_storage));
             }
         }
 
+        function exportHistory () {
+            _sessionStorage = JSON.parse(sessionStorage.getItem(nick));
+            content = Date().toLocaleString() + "\n";
+            for (var i=0; i<_sessionStorage.history.length; i++) {
+                content += "[" + ftime(_sessionStorage.history[i].time) + "] ";
+                content += _sessionStorage.history[i].nick + ": ";
+                content += _sessionStorage.history[i].msg + "\n";
+            }
+            uriContent = "data:application/octet-stream,"; 
+            uriContent += encodeURIComponent(content + "\n");
+            location.href = uriContent;
+            //window.open(uriContent, 'chat.txt');
+        }
     </script>
 </body>
 </html>
