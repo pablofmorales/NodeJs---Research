@@ -11,6 +11,10 @@ app.get('/js/drawer.js', function (req, res) {
     res.sendfile(__dirname + '/js/drawer.js');
 });
 
+app.get('/js/brush.js', function (req, res) {
+    res.sendfile(__dirname + '/js/brush.js');
+});
+
 io.sockets.on('connection', function (socket) {
   socket.on('dot', function (data) {
     socket.broadcast.emit('dot', data);

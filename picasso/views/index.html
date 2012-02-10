@@ -34,6 +34,9 @@
         <script type="text/javascript" src="/js/drawer.js">
         </script>
         
+        <script type="text/javascript" src="/js/brush.js">
+        </script>
+        
         <script type="text/javascript">
         
         function onLoad()
@@ -42,7 +45,7 @@
             
             window.messageBus.on('dot', function(dot) {
                 
-                var oldColor = window.drawer.getColor();
+                var oldColor = window.drawer.color();
                 
                 window.drawer.color(dot.color);
                 
@@ -53,11 +56,18 @@
             
             window.areWeDrawing = false;
             
-            window.drawer = new Drawer(document.getElementById('painting'));
+            var brushStrategy = new BrushRect(50, 50);
+            //var brushStrategy = new BrushDot();
+            //var brushStrategy = new BrushBigCircle();
+
+            window.drawer = new Drawer(
+                document.getElementById('painting'),
+                brushStrategy
+            );
             
-            document.getElementById('painting').addEventListener('mousemove', onMouseMove);
             document.getElementById('painting').addEventListener('mouseup', onMouseUp);
             document.getElementById('painting').addEventListener('mousedown', onMouseDown);
+            document.getElementById('painting').addEventListener('mousemove', onMouseMove);
             
             var lis = document.getElementById('colorSelector').getElementsByTagName('li');
             
@@ -72,7 +82,7 @@
             {
                 var x     = event.clientX - this.offsetTop;
                 var y     = event.clientY - this.offsetLeft;
-                var color = window.drawer.getColor();
+                var color = window.drawer.color();
                 
                 window.drawer.paint(x, y);
                 window.messageBus.emit('dot', {'x': x, 'y': y, 'color': color});
@@ -84,20 +94,28 @@
             window.areWeDrawing = false;
         }
         
-        function onMouseDown()
+        function onMouseDown(event)
         {
             window.areWeDrawing = true;
+            
+            var x     = event.clientX - this.offsetTop;
+            var y     = event.clientY - this.offsetLeft;
+            var color = window.drawer.color();
+            
+            window.drawer.paint(x, y);
+            window.messageBus.emit('dot', {'x': x, 'y': y, 'color': color});
         }
         
-        function onChangeColor(event) {
+        function onChangeColor(event)
+        {
             var color = event.target.getAttribute('class');
             
-            window.drawer.setColor(color);
+            window.drawer.color(color);
         }
         </script>
     </head>
     <body onload="onLoad();">
-        <canvas id="painting" width="2720" height="500">
+        <canvas id="painting" width="1200" height="500">
             The browser doesn't support canvas
         </canvas>
         <ul id="colorSelector">
