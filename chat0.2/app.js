@@ -83,11 +83,11 @@ io.sockets.on('connection', function (socket) {
 });
 
 function sendNickList() {
-    var result = '';
+    var nicks = [];
     for (var i=0; i<conns.length; i++) {
-        result += '<li>' + conns[i].nick + '</li>';
+        nicks.push(conns[i].nick);
     }
-    io.sockets.emit('nickList', {'nicks': result});
+    io.sockets.emit('nickList', {'nicks': nicks});
 }
 
 function logout (data) {

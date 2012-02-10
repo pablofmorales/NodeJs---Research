@@ -25,10 +25,7 @@
     <input type="submit" value="send" onclick="send();return false" />
     <a href="javascript:logout()">logout</a>
     </form>
-    <div>
-        <ul id='nick-list'>
-        </ul>
-    </div>
+    <div id='nick-list'></div>
     <script>
         var socket = io.connect();
         var nick = get_nick();
@@ -57,9 +54,13 @@
         });
 
         socket.on('nickList', function (data) {
-            document.getElementById('nick-list').innerHTML = '';
-            console.log(data);    
-            document.getElementById('nick-list').innerHTML = data.nicks; 
+            var html = '';
+            for (var i=0; i<data.nicks.length; i++) {
+                html += '<li>' + data.nicks[i] + '</li>';
+            }
+            html = '<ul>' + html + '</ul>';
+            document.getElementById('nick-list').innerHTML = html;
+            console.log(data.nicks);
         });
 
         function get_nick () {
