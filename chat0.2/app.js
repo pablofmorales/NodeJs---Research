@@ -37,6 +37,8 @@ io.sockets.on('connection', function (socket) {
     })
 
     socket.on('login', function (data) {
+        var now = Date.now();
+
         var nick_exists = false;
         for (var i=0; i<conns.length; i++) {
             if (conns[i].nick == data.nick) {
@@ -44,10 +46,12 @@ io.sockets.on('connection', function (socket) {
                 break;
             }
         }
+
         if (data.nick == servername || nick_exists) {
             msg = { nick:  servername,
                     msg:   data.nick + ' already exists',
-                    time:  Date.now(),
+                    time:  now,
+                    type:  'server',
                     error: true };
         }
         else {
@@ -58,12 +62,15 @@ io.sockets.on('connection', function (socket) {
             socket.broadcast.emit('chat',
                                   { nick: servername,
                                     msg:  data.nick + ' has joined',
-                                    time: Date.now() });
+                                    time: now,
+                                    type: 'server' });
             // Welcome message (user only)
             msg = { nick: servername,
                     msg:  'Hello ' + data.nick,
-                    time: Date.now() };
+                    time: now,
+                    type: 'server' };
         }
+
         console.log(msg);
         socket.emit('chat', msg);
     });
@@ -74,11 +81,35 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('msg', function (data) {
         console.log(data);
-        io.sockets.emit('chat', { nick: socket.nick,
-                                  msg:  data.msg,
-                                  time: Date.now() });
-    });
+        var now = Date.now();
 
+        // Private msg
+        if (data.msg.match(/^\/msg /)) {
+            var nick_start = '/msg '.length;
+            var msg_start = data.msg.indexOf(' ', nick_start) + 1;
+            var nick = data.msg.substr(nick_start,  msg_start - nick_start - 1);
+            var msg = data.msg.substr(msg_start);
+            for (var i=0; i<conns.length; i++) {
+                console.log(conns[i].nick);
+                if (conns[i].nick == nick) {
+                    var msg = { nick: socket.nick,
+                                msg:  msg,
+                                time: now,
+                                type: 'private',
+                                to:   nick };
+                    conns[i].emit('chat', msg); // private msg target
+                    socket.emit('chat', msg); // private msg source
+                }
+            }
+        }
+        // Normal msg
+        else {
+            io.sockets.emit('chat', { nick: socket.nick,
+                                      msg:  data.msg,
+                                      time: now,
+                                      type: 'normal' });
+        }
+    });
 
 });
 
@@ -96,7 +127,8 @@ function logout (data) {
             conns[i].broadcast.emit('chat',
                                     { nick: servername,
                                       msg:  data.nick + ' has quit',
-                                      time: Date.now() });
+                                      time: Date.now(),
+                                      type: 'server' });
             s = conns.splice(i, 1);
             break;
         }
