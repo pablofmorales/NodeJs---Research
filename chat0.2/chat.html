@@ -109,7 +109,7 @@
             var nick_class = 'nick-' + data.type;
             var html_nick = '<span class="' + nick_class + '">' + _nick + '</span>';
             html_nick = marks_nick[0] + html_nick + marks_nick[1];
-            var html_msg = '<span class="msg">' + data.msg + '</span>';
+            var html_msg = '<span class="msg">' + urlify(data.msg) + '</span>';
             return anchor + '<p>' + html_time + html_nick + html_msg + '</p>';
         }
 
@@ -122,9 +122,16 @@
             return hour + ':' + min;
         }
 
+        function urlify (text) {
+            var regex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(regex, '<a href="$1" target="_blank">$1</a>');
+        }
+
         function send () {
-            socket.emit('msg', {'msg': msg.value});
-            msg.value = '';
+            if (msg.value) {
+                socket.emit('msg', {'msg': msg.value});
+                msg.value = '';
+            }
             msg.focus();
         }
 
