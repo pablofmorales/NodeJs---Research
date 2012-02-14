@@ -36,19 +36,19 @@
     <div id='nick-list'></div>
     <script>
         // Settings
-        var marks_time = ['[', '] '];
-        var marks_nick_public_msg = ['', ': '];
-        var marks_nick_private_msg_to = ['»', ': '];
-        var marks_nick_private_msg_from = ['«', ': '];
+        var marksTime = ['[', '] '];
+        var marksNickPublicMsg = ['', ': '];
+        var marksNickPrivateMsgTo = ['»', ': '];
+        var marksNickPrivateMsgFrom = ['«', ': '];
 
         var socket = io.connect();
-        var nick = get_nick_from_url();
+        var nick = getNickFromURL();
         var chat = document.getElementById('chat');
         var msg = document.getElementById('msg');
-        var storage_json_tpl = {'history': []};
+        var storageJsonTpl = {'history': []};
         var init = true;
 
-        var last_msg = {time: 0, msg: ''};
+        var lastMsg = {time: 0, msg: ''};
 
         // login into chat
         socket.emit('login', { 'nick': nick });
@@ -60,11 +60,11 @@
             else {
                 if (init) {
                     init = false;
-                    load_history();
+                    loadHistory();
                 }
-                chat.innerHTML += get_html(data);
-                save_history(data);
-                last_msg = { time: Date.now(),
+                chat.innerHTML += getHTML(data);
+                saveHistory(data);
+                lastMsg = { time: Date.now(),
                              msg: data.nick + ': ' + data.msg };
                 location.href = '#' + data.time; // go to end of chat
             }
@@ -86,7 +86,7 @@
             document.getElementById('nick-list').innerHTML = html;
         });
 
-        function get_nick_from_url () {
+        function getNickFromURL () {
             _nick = location.search.substring(1).split('=')[1];
             _nick = unescape(_nick);
             _nick = _nick.replace(/\+/g, ' '); // + to space
@@ -100,21 +100,21 @@
             msg.focus();
         }
 
-        function get_html (data) {
+        function getHTML (data) {
             var anchor = '<a name="' + data.time + '"></a>';
-            var _time = marks_time[0] + ftime(data.time) + marks_time[1];
-            var html_time = '<span class="time">' + _time + '</span>';
-            var _nick = get_nick(data);
+            var _time = marksTime[0] + ftime(data.time) + marksTime[1];
+            var htmlTime = '<span class="time">' + _time + '</span>';
+            var _nick = getNick(data);
             if (data.type != 'server' && _nick != nick) {
                 _nick = '<a href="javascript:private(\'' + _nick + '\')"'
                       + 'class="nick">' + _nick + '</a>';
             }
-            var marks_nick = get_marks_nick(data);
-            var nick_class = 'nick-' + data.type;
-            var html_nick = '<span class="' + nick_class + '">' + _nick + '</span>';
-            html_nick = marks_nick[0] + html_nick + marks_nick[1];
-            var html_msg = '<span class="msg">' + urlify(data.msg) + '</span>';
-            return anchor + '<p>' + html_time + html_nick + html_msg + '</p>';
+            var marksNick = getMarksNick(data);
+            var nickClass = 'nick-' + data.type;
+            var htmlNick = '<span class="' + nickClass + '">' + _nick + '</span>';
+            htmlNick = marksNick[0] + htmlNick + marksNick[1];
+            var htmlMsg = '<span class="msg">' + urlify(data.msg) + '</span>';
+            return anchor + '<p>' + htmlTime + htmlNick + htmlMsg + '</p>';
         }
 
         function ftime (time) {
@@ -146,14 +146,14 @@
             }
         }
 
-        function save_history (data) {
+        function saveHistory (data) {
             var _storage = JSON.parse(localStorage.getItem(nick));
             var _sessionStorage = JSON.parse(sessionStorage.getItem(nick));
             if (!_storage) {
-                _storage = storage_json_tpl;
+                _storage = storageJsonTpl;
             }
             if (!_sessionStorage) {
-                _sessionStorage = storage_json_tpl;
+                _sessionStorage = storageJsonTpl;
             }
             _storage.history.push(data);
             _sessionStorage.history.push(data);
@@ -164,11 +164,11 @@
             sessionStorage.setItem(nick, JSON.stringify(_sessionStorage));
         }
 
-        function load_history () {
+        function loadHistory () {
             var _storage = JSON.parse(localStorage.getItem(nick));
             if (_storage) {
                 for (var i=0; i<_storage.history.length; i++) {
-                    chat.innerHTML += get_html(_storage.history[i]);
+                    chat.innerHTML += getHTML(_storage.history[i]);
                 }
                 sessionStorage.setItem(nick, JSON.stringify(_storage));
             }
@@ -179,10 +179,10 @@
             content = "Export @ " + Date().toLocaleString() + "\n";
             for (var i=0; i<_sessionStorage.history.length; i++) {
                 var data = _sessionStorage.history[i];
-                var marks_nick = get_marks_nick(data);
-                var _nick = get_nick(data);
-                content += marks_time[0] + ftime(data.time) + marks_time[1];
-                content += marks_nick[0] + _nick + marks_nick[1];
+                var marksNick = getMarksNick(data);
+                var _nick = getNick(data);
+                content += marksTime[0] + ftime(data.time) + marksTime[1];
+                content += marksNick[0] + _nick + marksNick[1];
                 content += data.msg + "\n";
             }
             uriContent = "data:application/octet-stream,"; 
@@ -191,17 +191,17 @@
             //window.open(uriContent, 'chat.txt');
         }
 
-        function get_marks_nick (data) {
+        function getMarksNick (data) {
             if (data.type == 'private') {
                 if (data.nick == nick) {
-                    return marks_nick_private_msg_to;
+                    return marksNickPrivateMsgTo;
                 }
-                return marks_nick_private_msg_from;
+                return marksNickPrivateMsgFrom;
             }
-            return marks_nick_public_msg;
+            return marksNickPublicMsg;
         }
 
-        function get_nick (data) {
+        function getNick (data) {
             if (data.type == 'private' && data.nick == nick) {
                 return data.to;
             }
@@ -212,22 +212,22 @@
         // Show title blink on new messages and tab unfocus
         // ------------------------------------------------
         window.intervalId;
-        window.document_title = document.title;
+        window.documentTitle = document.title;
 
         window.addEventListener('focus', function () {
-            window.clearInterval(this.intervalId);
+            clearInterval(this.intervalId);
             setTimeout(function () {
-                document.title = this.document_title;
+                document.title = this.documentTitle;
             }, 500);
         });
 
         window.addEventListener('blur', function () {
             tstart = Date.now();
             this.intervalId = setInterval(function () {
-                if (last_msg.time > tstart) {
-                    document.title = this.document_title;
+                if (lastMsg.time > tstart) {
+                    document.title = this.documentTitle;
                     setTimeout(function () {
-                        document.title = last_msg.msg;
+                        document.title = lastMsg.msg;
                     }, 500)
                 }
             }, 2000);
