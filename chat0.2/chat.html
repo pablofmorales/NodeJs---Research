@@ -48,6 +48,8 @@
         var storage_json_tpl = {'history': []};
         var init = true;
 
+        var last_msg = {time: 0, msg: ''};
+
         // login into chat
         socket.emit('login', { 'nick': nick });
 
@@ -62,6 +64,8 @@
                 }
                 chat.innerHTML += get_html(data);
                 save_history(data);
+                last_msg = { time: Date.now(),
+                             msg: data.nick + ': ' + data.msg };
                 location.href = '#' + data.time; // go to end of chat
             }
             msg.focus();
@@ -203,6 +207,32 @@
             }
             return data.nick;
         }
+
+        // ------------------------------------------------
+        // Show title blink on new messages and tab unfocus
+        // ------------------------------------------------
+        window.intervalId;
+        window.document_title = document.title;
+
+        window.addEventListener('focus', function () {
+            window.clearInterval(this.intervalId);
+            setTimeout(function () {
+                document.title = this.document_title;
+            }, 500);
+        });
+
+        window.addEventListener('blur', function () {
+            tstart = Date.now();
+            this.intervalId = setInterval(function () {
+                if (last_msg.time > tstart) {
+                    document.title = this.document_title;
+                    setTimeout(function () {
+                        document.title = last_msg.msg;
+                    }, 500)
+                }
+            }, 2000);
+        });
+        // ------------------------------------------------
     </script>
 </body>
 </html>
