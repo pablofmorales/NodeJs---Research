@@ -82,13 +82,13 @@ io.sockets.on('connection', function (socket) {
     socket.on('msg', function (data) {
         console.log(data);
         var now = Date.now();
+        data.msg = data.msg.replace(/^\s+/, '').replace(/\s+$/, ''); //trim
+        var msgTokens = data.msg.split(' ');
 
         // Private msg
-        if (data.msg.match(/^\/msg /)) {
-            var nick_start = '/msg '.length;
-            var msg_start = data.msg.indexOf(' ', nick_start) + 1;
-            var nick = data.msg.substr(nick_start,  msg_start - nick_start - 1);
-            var msg = data.msg.substr(msg_start);
+        if (msgTokens[0] == '/msg') {
+            var nick = msgTokens.splice(0, 2)[1];
+            var msg = msgTokens.join(' ');
             for (var i=0; i<conns.length; i++) {
                 console.log(conns[i].nick);
                 if (conns[i].nick == nick) {
