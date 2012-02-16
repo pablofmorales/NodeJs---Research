@@ -82,7 +82,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('msg', function (data) {
         console.log(data);
         var now = Date.now();
-        data.msg = data.msg.replace(/^\s+/, '').replace(/\s+$/, ''); //trim
+        data.msg = data.msg.replace(/^\s+|\s+$/, ''); //trim
         var msgTokens = data.msg.split(' ');
 
         // Private msg

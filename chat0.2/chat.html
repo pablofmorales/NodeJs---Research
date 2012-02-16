@@ -90,7 +90,7 @@
             _nick = location.search.substring(1).split('=')[1];
             _nick = unescape(_nick);
             _nick = _nick.replace(/\+/g, ' '); // + to space
-            _nick = _nick.replace(/^\s+/g, '').replace(/\s+$/g, ''); // trim
+            _nick = _nick.replace(/^\s+|\s+$/g, ''); // trim
             _nick = _nick.replace(/ /g, '_'); // space to _
             return _nick;
         }
