@@ -11,6 +11,8 @@ function handler (req, res) {
         show('/chat.html', res);
     else if (req.url.match(/^(\/|\/\?error=.*)$/))
         show('/login.html', res);
+    else if (req.url.match(/^\/bootstrap\//))
+        show(req.url, res)
     else {
         res.writeHead(404);
         res.end('Document not found');

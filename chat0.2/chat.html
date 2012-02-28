@@ -2,38 +2,64 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name"description" content="">
+    <meta name"author" content="">
+
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
     <script src="/socket.io/socket.io.js"></script>
     <style>
+        body {
+            padding-top: 20px;
+        }
         #chat {
             font-family: Courier, "Courier New", monospace;
             font-size: 16px;
-            width: 500px;
+            background: white;
             height: 350px;
-            border: solid 1px gray;
+            border: solid 1px #ddd;
             overflow-y: scroll;
+            padding: 0;
         }
         #msg { width: 300px; }
         p { margin: .3em .5em; }
         .time { color: gray; }
-        .nick-server { color: red; }
-        .nick-normal { color: blue; }
-        .nick-private { color: green; }
+        .nick-server { color: #d14; }
+        .nick-normal { color: #08c; }
+        .nick-private { color: #51a351; }
         a.nick {
             color: inherit;
             text-decoration: none;
+        }
+        .sidebar-nav {
+            padding: 9px 0;
         }
     </style>
     <title>Chat</title>
 </head>
 <body>
-    <div id="chat"></div>
-    <form onsubmit="send();return false">
-    <input type="text" name="msg" id="msg" value="" autofocus="autofocus" />
-    <input type="submit" value="send" />
-    <a href="javascript:exportHistory()">export</a>
-    <a href="javascript:logout()">logout</a>
-    </form>
-    <div id='nick-list'></div>
+    <div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span6">
+            <form class="well" onsubmit="send();return false">
+                <div id="chat" class="well"></div>
+                <div class="form-inline">
+                    <input type="text" class="input-small" name="msg" id="msg" autofocus="autofocus">
+                    <a href="#" onclick="document.forms[0].submit()" class="btn btn-success"><i class="icon-comment icon-white"></i> send</a>
+                    <a href="javascript:exportHistory()" class="btn"><i class="icon-share-alt"></i> export</a>
+                    <a href="javascript:logout()" class="btn"><i class="icon-off"></i> logout</a>
+                </div>
+            </form>
+        </div>
+        <div class="span3">
+            <div class="well sidebar-nav">
+                <ul class="nav nav-list" id="nick-list"></ul>
+            </div>
+        </div>
+    </div>
+    </div>
     <script>
         // Settings
         var marksTime = ['[', '] '];
@@ -73,16 +99,17 @@
 
         socket.on('nickList', function (data) {
             console.log(data.nicks);
-            var html = ''
+            var html = '<li class="nav-header">Users</li>'
             for (var i=0; i<data.nicks.length; i++) {
                 _nick = data.nicks[i];
                 if (_nick != nick) {
-                    _nick = '<a href="javascript:private(\'' + _nick + '\')">'
-                          + _nick + '</a>';
+                    html += '<li><a href="javascript:private(\'' + _nick + '\')">' +
+                            _nick + '</a></li>';
                 }
-                html += '<li>' + _nick + '</li>';
+                else {
+                    html += '<li class="active"><a href="#">' + _nick + '</a></li>';
+                }
             }
-            html = '<ul>' + html + '</ul>';
             document.getElementById('nick-list').innerHTML = html;
         });
 
